@@ -10,6 +10,7 @@ import {
   UserOutlined,
   SearchOutlined,
   QuestionCircleOutlined,
+  EyeInvisibleOutlined,
 } from '@ant-design/icons';
 
 interface SubToolBarProps {
@@ -60,7 +61,7 @@ const SubToolBar: React.FC<SubToolBarProps> = ({
             </Typography.Text>
           </Space>
           <Space size="small" style={{ position: 'relative' }}>
-            <UserOutlined style={{ fontSize: '12px' }} />
+            <EyeInvisibleOutlined style={{ fontSize: '12px' }} />
             <Button 
               type="link" 
               style={{ 
@@ -117,8 +118,6 @@ const SubToolBar: React.FC<SubToolBarProps> = ({
                     </div>
                   ))}
                 </div>
-
-                <Divider style={{ margin: '12px 0' }} />
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Button 
