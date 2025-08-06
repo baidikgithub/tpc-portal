@@ -1,10 +1,27 @@
+'use client';
 import React from 'react';
-import { Button } from 'antd';
+import { Layout } from 'antd';
+import AppHeader from '../components/Header/index';
+import StudentTable from '@/components/StudentTable';
+import SubToolBar from '@/components/SubToolBar';
+import TopMenuBar from '@/components/TopMenuBar';
+import { Content } from 'antd/es/layout/layout';
 
-const Home = () => (
-  <div className="App">
-    <Button type="primary">Button</Button>
-  </div>
-);
+const App: React.FC = () => {
+  return (
+    <Layout>
+      <AppHeader
+        logoSrc="/logo.png" // Replace with your actual logo path
+        title="DJSC INFORMATION TECHNOLOGY"
+        subtitle="Placement Portal"
+      />
+      <TopMenuBar />
+      {/* <SubToolBar /> */}
+      <Content style={{ margin: '16px' }}>
+        {/* <StudentTable /> */}
+      </Content>
+    </Layout>
+  );
+};
 
-export default Home;
+export default App;
