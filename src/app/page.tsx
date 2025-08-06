@@ -18,7 +18,7 @@ const App: React.FC = () => {
       <TopMenuBar />
       {/* <SubToolBar /> */}
       <Content style={{ margin: '16px' }}>
-        {/* <StudentTable /> */}
+        {/* <StudentTable />  ` */}
       </Content>
     </Layout>
   );

@@ -1,11 +1,16 @@
 import React from 'react';
-import { Table, Checkbox, Space, Typography } from 'antd';
+import { Table, Checkbox, Space, Typography, Dropdown, Menu } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { 
   DownOutlined, 
   LockOutlined, 
   CalendarOutlined,
-  TableOutlined 
+  TableOutlined,
+  LinkOutlined,
+  FilterOutlined,
+  SortAscendingOutlined,
+  AppstoreOutlined,
+  EyeInvisibleOutlined
 } from '@ant-design/icons';
 // import StudentTag from '../StudentTag';
 import StudentDate from '../StudentDate';
@@ -26,13 +31,33 @@ interface StudentTableProps {
   studentsData: Student[];
 }
 
+const companyMenu = (
+  <Menu>
+    <Menu.Item key="copy-url" icon={<LinkOutlined />}>
+      Copy Column URL
+    </Menu.Item>
+    <Menu.Item key="add-filter" icon={<FilterOutlined />}>
+      Add Filter
+    </Menu.Item>
+    <Menu.Item key="add-sort" icon={<SortAscendingOutlined />}>
+      Add Sort
+    </Menu.Item>
+    <Menu.Item key="add-group" icon={<AppstoreOutlined />}>
+      Add Group
+    </Menu.Item>
+    <Menu.Item key="hide-column" icon={<EyeInvisibleOutlined />}>
+      Hide Column
+    </Menu.Item>
+  </Menu>
+);
+
 const columns: ColumnsType<Student> = [
   {
     title: '',
     dataIndex: 'checkbox',
     key: 'checkbox',
     width: 40,
-    render: () => <Checkbox />,
+    render: () => <Checkbox />, 
   },
   {
     title: (
@@ -61,7 +86,9 @@ const columns: ColumnsType<Student> = [
     title: (
       <Space size={2}>
         Company
-        <DownOutlined style={{ fontSize: '8px' }} />
+        <Dropdown overlay={companyMenu} trigger={["click"]} placement="bottomLeft">
+          <DownOutlined style={{ fontSize: '8px', cursor: 'pointer' }} onClick={e => e.stopPropagation()} />
+        </Dropdown>
       </Space>
     ),
     dataIndex: 'company',
