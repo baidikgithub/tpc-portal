@@ -6,20 +6,13 @@ import StudentTable from '@/components/StudentTable';
 import SubToolBar from '@/components/SubToolBar';
 import TopMenuBar from '@/components/TopMenuBar';
 import { Content } from 'antd/es/layout/layout';
-
+import logo from '../../public/logo.jpg';
+import AppLandingPage from '@/components/LandingPage';
 const App: React.FC = () => {
   return (
     <Layout>
-      <AppHeader
-        logoSrc="/logo.png" // Replace with your actual logo path
-        title="DJSC INFORMATION TECHNOLOGY"
-        subtitle="Placement Portal"
-      />
-      <TopMenuBar />
-      {/* <SubToolBar /> */}
-      <Content style={{ margin: '16px' }}>
-        {/* <StudentTable />  ` */}
-      </Content>
+      <AppLandingPage />
+    
     </Layout>
   );
 };
