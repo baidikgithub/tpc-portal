@@ -13,26 +13,78 @@ interface AppHeaderProps {
 
 const AppHeader: React.FC<AppHeaderProps> = ({ logoSrc, title, subtitle }) => {
   return (
-    <Header style={{ background: '#fff', padding: '0 24px' }}>
-      <Row align="middle" gutter={16}>
+    <Header
+      style={{
+        background: 'linear-gradient(90deg, #0f1c4d 0%, #1c2d61 100%)',
+        padding: '0 40px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        minHeight: 80,
+        display: 'flex',
+        alignItems: 'center',
+        zIndex: 10,
+      }}
+    >
+      <Row align="middle" justify="space-between" style={{ width: '100%' }}>
         <Col>
-          <Image
-            src={logoSrc}
-            alt="Logo"
-            preview={false}
-            width={50}
-            height={50}
-            style={{ objectFit: 'contain' }}
-          />
+          <Row align="middle" gutter={24} wrap={false}>
+            <Col>
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+                  marginRight: 20,
+                }}
+              >
+                <Image
+                  src={logoSrc}
+                  alt="Logo"
+                  preview={false}
+                  width={48}
+                  height={48}
+                  style={{ objectFit: 'contain' }}
+                />
+              </div>
+            </Col>
+            <Col>
+              <Title
+                level={3}
+                style={{
+                  margin: 0,
+                  color: '#fff',
+                  fontWeight: 800,
+                  letterSpacing: 1,
+                  fontFamily: 'Inter, Segoe UI, Arial, sans-serif',
+                }}
+              >
+                {title}
+              </Title>
+              <Text
+                strong
+                style={{
+                  color: '#e0e7ff',
+                  fontSize: 18,
+                  fontWeight: 500,
+                  letterSpacing: 0.5,
+                  fontFamily: 'Inter, Segoe UI, Arial, sans-serif',
+                }}
+              >
+                {subtitle}
+              </Text>
+            </Col>
+          </Row>
         </Col>
-        <Col>
-          <Title level={5} style={{ margin: 0, color: '#0f1c4d' }}>
-            {title}
-          </Title>
-          <Text strong style={{ color: '#1c2d61', fontSize: 16 }}>
-            {subtitle}
-          </Text>
-        </Col>
+        {/* Optional: Right-aligned section for contact or quick links */}
+        {/* <Col>
+          <div style={{ color: '#fff', fontWeight: 500, fontSize: 16 }}>
+            Contact: +91 9732947000
+          </div>
+        </Col> */}
       </Row>
     </Header>
   );
