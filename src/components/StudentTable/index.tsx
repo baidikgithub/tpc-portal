@@ -29,6 +29,8 @@ interface Student {
 
 interface StudentTableProps {
   studentsData: Student[];
+  size?: 'small' | 'middle' | 'large';
+  className?: string;
 }
 
 const companyMenu = (
@@ -160,26 +162,21 @@ const columns: ColumnsType<Student> = [
   },
 ];
 
-const StudentTable: React.FC<StudentTableProps> = ({ studentsData }) => {
+const StudentTable: React.FC<StudentTableProps> = ({ studentsData, size = 'middle', className }) => {
   return (
-    <div style={{ background: '#fff' }}>
+    <div className={className}>
       <Table 
         columns={columns} 
         dataSource={studentsData} 
         pagination={false}
         rowKey="key"
+        size={size}
         style={{ 
           border: '1px solid #e0e0e0'
         }}
         className="custom-table"
       />
-      <div style={{ 
-        padding: '6px 12px', 
-        borderTop: '1px solid #e0e0e0',
-        background: '#fafafa',
-        fontSize: '11px',
-        color: '#666'
-      }}>
+      <div className="px-3 py-2 border-t border-gray-200 bg-gray-50 text-xs text-gray-500">
         {studentsData.length} rows
       </div>
     </div>

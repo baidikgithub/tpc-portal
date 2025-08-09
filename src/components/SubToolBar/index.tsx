@@ -41,13 +41,15 @@ const SubToolBar: React.FC<SubToolBarProps> = ({
       <Row
         style={{
           background: '#fff',
-          padding: '8px 12px',
-          alignItems: 'center'
+          padding: '16px 24px',
+          alignItems: 'center',
+          borderRadius: '8px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
         }}
         align="middle"
         justify="space-between"
       >
-        <Space size="middle">
+        <Space size={24}>
           <Space size="small">
             <EyeOutlined style={{ fontSize: '12px' }} />
             <Typography.Text strong style={{ fontSize: '12px' }}>

@@ -1,505 +1,385 @@
-'use client'
-import React, { useState, useEffect } from 'react';
-import { Layout, Row, Col, Card, Statistic, Button, Table, Select, Input, Space, Progress, Alert, Dropdown, Menu } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import { 
-  DownloadOutlined, 
-  SearchOutlined, 
-  FilterOutlined,
+'use client';
+
+import {
+  Row,
+  Col,
+  Space,
+  Switch,
+  Button,
+  Dropdown,
+  DatePicker,
+  Input,
+  Table,
+  Card,
+  Statistic,
+  Menu,
+} from 'antd';
+import {
+  DownloadOutlined,
+  DownOutlined,
   UserOutlined,
   TeamOutlined,
-  BookOutlined,
-  FileTextOutlined,
-  EyeOutlined,
-  MoreOutlined,
-  PieChartOutlined,
-  BarChartOutlined,
-  LineChartOutlined
 } from '@ant-design/icons';
-import { Content } from 'antd/es/layout/layout';
-import TopMenuBar from '@/components/TopMenuBar';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import { useState, useEffect } from 'react';
+import type { ColumnsType } from 'antd/es/table';
 
-const { Search } = Input;
-const { Option } = Select;
+const { RangePicker } = DatePicker;
 
+// ---- Types ----
 interface Student {
   key: string;
   name: string;
-  rollNumber: string;
   department: string;
+  profileCompleted: boolean;
+  placed: boolean;
   cgpa: number;
-  status: 'Registered' | 'Not Registered';
-  mockTestTaken: boolean;
-  mockTestScore?: number;
-  resumeUploaded: boolean;
-  registrationDate?: string;
 }
 
-interface Department {
-  name: string;
-  totalStudents: number;
-  registeredStudents: number;
-  percentageFilled: number;
+// ---- Dummy Students ----
+const DUMMY_STUDENTS: Student[] = [
+  { key: '1', name: 'John Doe', department: 'Computer Science', profileCompleted: true, placed: true, cgpa: 8.5 },
+  { key: '2', name: 'Jane Smith', department: 'Electrical Engineering', profileCompleted: false, placed: false, cgpa: 7.8 },
+  { key: '3', name: 'Mike Johnson', department: 'Mechanical Engineering', profileCompleted: true, placed: false, cgpa: 9.2 },
+  { key: '4', name: 'Sarah Wilson', department: 'Computer Science', profileCompleted: true, placed: true, cgpa: 8.0 },
+  { key: '5', name: 'David Brown', department: 'Civil Engineering', profileCompleted: false, placed: false, cgpa: 7.5 },
+];
+
+// ---- Table Columns ----
+const columns: ColumnsType<Student> = [
+  { title: 'Name', dataIndex: 'name', key: 'name' },
+  { title: 'Department', dataIndex: 'department', key: 'department' },
+  {
+    title: 'Profile Completed',
+    dataIndex: 'profileCompleted',
+    key: 'profileCompleted',
+    render: (val: boolean) => (val ? 'Yes' : 'No'),
+  },
+  {
+    title: 'Placed',
+    dataIndex: 'placed',
+    key: 'placed',
+    render: (val: boolean) => (val ? 'Yes' : 'No'),
+  },
+  { title: 'CGPA', dataIndex: 'cgpa', key: 'cgpa' },
+];
+
+// ---- Helper functions ----
+function getDepartmentStats(students: Student[]) {
+  const deptMap: Record<string, { total: number; registered: number; placed: number }> = {};
+  students.forEach((s) => {
+    if (!deptMap[s.department]) {
+      deptMap[s.department] = { total: 0, registered: 0, placed: 0 };
+    }
+    deptMap[s.department].total++;
+    if (s.profileCompleted) deptMap[s.department].registered++;
+    if (s.placed) deptMap[s.department].placed++;
+  });
+  return Object.keys(deptMap).map((dept) => ({
+    department: dept,
+    total: deptMap[dept].total,
+    registered: deptMap[dept].registered,
+    placed: deptMap[dept].placed,
+  }));
 }
 
-const mockStudents: Student[] = [
-  {
-    key: '1',
-    name: 'John Doe',
-    rollNumber: '2021001',
-    department: 'Computer Science',
-    cgpa: 8.5,
-    status: 'Registered',
-    mockTestTaken: true,
-    mockTestScore: 85,
-    resumeUploaded: true,
-    registrationDate: '2024-01-15'
-  },
-  {
-    key: '2',
-    name: 'Jane Smith',
-    rollNumber: '2021002',
-    department: 'Electrical Engineering',
-    cgpa: 7.8,
-    status: 'Not Registered',
-    mockTestTaken: false,
-    resumeUploaded: false
-  },
-  {
-    key: '3',
-    name: 'Mike Johnson',
-    rollNumber: '2021003',
-    department: 'Mechanical Engineering',
-    cgpa: 9.2,
-    status: 'Registered',
-    mockTestTaken: true,
-    mockTestScore: 92,
-    resumeUploaded: true,
-    registrationDate: '2024-01-10'
-  },
-  {
-    key: '4',
-    name: 'Sarah Wilson',
-    rollNumber: '2021004',
-    department: 'Computer Science',
-    cgpa: 8.0,
-    status: 'Registered',
-    mockTestTaken: true,
-    mockTestScore: 78,
-    resumeUploaded: true,
-    registrationDate: '2024-01-20'
-  },
-  {
-    key: '5',
-    name: 'David Brown',
-    rollNumber: '2021005',
-    department: 'Civil Engineering',
-    cgpa: 7.5,
-    status: 'Not Registered',
-    mockTestTaken: false,
-    resumeUploaded: false
-  }
-];
+// ---- Components ----
+function HeaderSwitch({
+  title,
+  leftLabel,
+  rightLabel,
+  checked,
+  onChange,
+}: {
+  title: string;
+  leftLabel: string;
+  rightLabel: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <h2 style={{ margin: 0 }}>{title}</h2>
+      <span>{leftLabel}</span>
+      <Switch checked={checked} onChange={onChange} />
+      <span>{rightLabel}</span>
+    </div>
+  );
+}
 
-const departments: Department[] = [
-  { name: 'Computer Science', totalStudents: 150, registeredStudents: 120, percentageFilled: 80 },
-  { name: 'Electrical Engineering', totalStudents: 120, registeredStudents: 85, percentageFilled: 71 },
-  { name: 'Mechanical Engineering', totalStudents: 100, registeredStudents: 95, percentageFilled: 95 },
-  { name: 'Civil Engineering', totalStudents: 80, registeredStudents: 45, percentageFilled: 56 },
-  { name: 'Chemical Engineering', totalStudents: 60, registeredStudents: 40, percentageFilled: 67 }
-];
-
-const DashboardPage: React.FC = () => {
-  const [students, setStudents] = useState<Student[]>(mockStudents);
-  const [filteredStudents, setFilteredStudents] = useState<Student[]>(mockStudents);
-  const [searchText, setSearchText] = useState('');
-  const [departmentFilter, setDepartmentFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [mockTestFilter, setMockTestFilter] = useState<string>('all');
-  const [cgpaFilter, setCgpaFilter] = useState<string>('all');
-
-  // Calculate statistics
-  const totalStudents = students.length;
-  const registeredStudents = students.filter(s => s.status === 'Registered').length;
-  const notRegisteredStudents = totalStudents - registeredStudents;
-  const totalDepartments = departments.length;
-  const mockTestTakenStudents = students.filter(s => s.mockTestTaken).length;
-  const averageMockTestScore = students
-    .filter(s => s.mockTestScore)
-    .reduce((acc, s) => acc + (s.mockTestScore || 0), 0) / students.filter(s => s.mockTestScore).length;
-
-  // Filter students
-  useEffect(() => {
-    let filtered = students;
-
-    if (searchText) {
-      filtered = filtered.filter(s => 
-        s.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        s.rollNumber.toLowerCase().includes(searchText.toLowerCase())
-      );
-    }
-
-    if (departmentFilter !== 'all') {
-      filtered = filtered.filter(s => s.department === departmentFilter);
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(s => s.status === statusFilter);
-    }
-
-    if (mockTestFilter !== 'all') {
-      filtered = filtered.filter(s => 
-        mockTestFilter === 'yes' ? s.mockTestTaken : !s.mockTestTaken
-      );
-    }
-
-    if (cgpaFilter !== 'all') {
-      const minCgpa = parseFloat(cgpaFilter);
-      filtered = filtered.filter(s => s.cgpa >= minCgpa);
-    }
-
-    setFilteredStudents(filtered);
-  }, [students, searchText, departmentFilter, statusFilter, mockTestFilter, cgpaFilter]);
-
-  // Table columns
-  const columns: ColumnsType<Student> = [
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: (a: Student, b: Student) => a.name.localeCompare(b.name),
-    },
-    {
-      title: 'Roll Number',
-      dataIndex: 'rollNumber',
-      key: 'rollNumber',
-    },
-    {
-      title: 'Department',
-      dataIndex: 'department',
-      key: 'department',
-      filters: departments.map(dept => ({ text: dept.name, value: dept.name })),
-      onFilter: (value, record: Student) => record.department === value,
-    },
-    {
-      title: 'CGPA',
-      dataIndex: 'cgpa',
-      key: 'cgpa',
-      sorter: (a: Student, b: Student) => a.cgpa - b.cgpa,
-      render: (cgpa: number) => (
-        <span style={{ color: cgpa >= 8.0 ? '#52c41a' : cgpa >= 7.0 ? '#faad14' : '#ff4d4f' }}>
-          {cgpa}
-        </span>
-      ),
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => (
-        <span style={{ 
-          color: status === 'Registered' ? '#52c41a' : '#ff4d4f',
-          fontWeight: 'bold'
-        }}>
-          {status}
-        </span>
-      ),
-    },
-    {
-      title: 'Mock Test',
-      dataIndex: 'mockTestTaken',
-      key: 'mockTestTaken',
-      render: (taken: boolean, record: Student) => (
-        <span>
-          {taken ? (
-            <span style={{ color: '#52c41a' }}>
-              Yes ({record.mockTestScore}%)
-            </span>
-          ) : (
-            <span style={{ color: '#ff4d4f' }}>No</span>
-          )}
-        </span>
-      ),
-    },
-    {
-      title: 'Resume',
-      dataIndex: 'resumeUploaded',
-      key: 'resumeUploaded',
-      render: (uploaded: boolean) => (
-        <span style={{ color: uploaded ? '#52c41a' : '#ff4d4f' }}>
-          {uploaded ? 'Uploaded' : 'Not Uploaded'}
-        </span>
-      ),
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (record: Student) => (
-        <Dropdown
-          overlay={
-            <Menu>
-              <Menu.Item key="view" icon={<EyeOutlined />}>
-                View Details
-              </Menu.Item>
-              <Menu.Item key="download" icon={<DownloadOutlined />}>
-                Download Resume
-              </Menu.Item>
-              <Menu.Item key="approve" icon={<FileTextOutlined />}>
-                Approve CV
-              </Menu.Item>
-            </Menu>
-          }
-        >
-          <Button type="text" icon={<MoreOutlined />} />
-        </Dropdown>
-      ),
-    },
-  ];
-
-  const handleExport = () => {
-    // Export logic here
-    console.log('Exporting filtered data...');
-  };
-
-  const departmentColumns = [
-    {
-      title: 'Department',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Total Students',
-      dataIndex: 'totalStudents',
-      key: 'totalStudents',
-      sorter: (a: Department, b: Department) => a.totalStudents - b.totalStudents,
-    },
-    {
-      title: 'Registered',
-      dataIndex: 'registeredStudents',
-      key: 'registeredStudents',
-    },
-    {
-      title: 'Not Registered',
-      key: 'notRegistered',
-      render: (record: Department) => record.totalStudents - record.registeredStudents,
-    },
-    {
-      title: 'Percentage Filled',
-      dataIndex: 'percentageFilled',
-      key: 'percentageFilled',
-      render: (percentage: number) => (
-        <Progress 
-          percent={percentage} 
-          size="small" 
-          status={percentage >= 80 ? 'success' : percentage >= 60 ? 'normal' : 'exception'}
-        />
-      ),
-    },
-  ];
+function IconButtonDropdown({
+  buttonName,
+  icon,
+  dropdownOptions,
+}: {
+  buttonName: string;
+  icon: React.ReactNode;
+  dropdownOptions: { key: string; label: string }[];
+}) {
+  const menuItems = (
+    <Menu
+      items={dropdownOptions.map((opt) => ({
+        key: opt.key,
+        label: opt.label,
+      }))}
+    />
+  );
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
-      <TopMenuBar />
-      <Content style={{ padding: '24px' }}>
-        {/* Overall Statistics */}
-        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-          <Col xs={24} sm={12} lg={6}>
-            <Card>
-              <Statistic
-                title="Total Students"
-                value={totalStudents}
-                prefix={<UserOutlined />}
-                valueStyle={{ color: '#1890ff' }}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} lg={6}>
-            <Card>
-              <Statistic
-                title="Registered Students"
-                value={registeredStudents}
-                prefix={<TeamOutlined />}
-                valueStyle={{ color: '#52c41a' }}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} lg={6}>
-            <Card>
-              <Statistic
-                title="Not Registered"
-                value={notRegisteredStudents}
-                prefix={<UserOutlined />}
-                valueStyle={{ color: '#ff4d4f' }}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} lg={6}>
-            <Card>
-              <Statistic
-                title="Departments"
-                value={totalDepartments}
-                prefix={<BookOutlined />}
-                valueStyle={{ color: '#722ed1' }}
-              />
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Mock Test Statistics */}
-        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-          <Col xs={24} sm={12} lg={8}>
-            <Card>
-              <Statistic
-                title="Mock Test Taken"
-                value={mockTestTakenStudents}
-                prefix={<FileTextOutlined />}
-                valueStyle={{ color: '#13c2c2' }}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} lg={8}>
-            <Card>
-              <Statistic
-                title="Average Score"
-                value={averageMockTestScore.toFixed(1)}
-                suffix="%"
-                prefix={<FileTextOutlined />}
-                valueStyle={{ color: '#fa8c16' }}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} lg={8}>
-            <Card>
-              <Button 
-                type="primary" 
-                icon={<DownloadOutlined />}
-                onClick={handleExport}
-                style={{ width: '100%', height: '100%' }}
-              >
-                Export to Excel
-              </Button>
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Alerts */}
-        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-          <Col span={24}>
-            <Alert
-              message="Low Registration Alert"
-              description="Civil Engineering department has only 56% registration rate. Consider sending reminders."
-              type="warning"
-              showIcon
-              style={{ marginBottom: '8px' }}
-            />
-            <Alert
-              message="Resume Upload Reminder"
-              description="5 students haven't uploaded their resumes yet."
-              type="info"
-              showIcon
-            />
-          </Col>
-        </Row>
-
-        {/* Department Summary */}
-        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-          <Col span={24}>
-            <Card 
-              title="Department-wise Summary" 
-              extra={
-                <Space>
-                  <Button icon={<PieChartOutlined />}>Pie Chart</Button>
-                  <Button icon={<BarChartOutlined />}>Bar Chart</Button>
-                  <Button icon={<LineChartOutlined />}>Line Chart</Button>
-                </Space>
-              }
-            >
-              <Table
-                dataSource={departments}
-                columns={departmentColumns}
-                pagination={false}
-                size="small"
-              />
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Student Data Management */}
-        <Row gutter={[16, 16]}>
-          <Col span={24}>
-            <Card 
-              title="Student Data Management"
-              extra={
-                <Space>
-                  <Select
-                    placeholder="Department"
-                    style={{ width: 150 }}
-                    value={departmentFilter}
-                    onChange={setDepartmentFilter}
-                  >
-                    <Option value="all">All Departments</Option>
-                    {departments.map(dept => (
-                      <Option key={dept.name} value={dept.name}>{dept.name}</Option>
-                    ))}
-                  </Select>
-                  <Select
-                    placeholder="Status"
-                    style={{ width: 120 }}
-                    value={statusFilter}
-                    onChange={setStatusFilter}
-                  >
-                    <Option value="all">All Status</Option>
-                    <Option value="Registered">Registered</Option>
-                    <Option value="Not Registered">Not Registered</Option>
-                  </Select>
-                  <Select
-                    placeholder="Mock Test"
-                    style={{ width: 120 }}
-                    value={mockTestFilter}
-                    onChange={setMockTestFilter}
-                  >
-                    <Option value="all">All</Option>
-                    <Option value="yes">Taken</Option>
-                    <Option value="no">Not Taken</Option>
-                  </Select>
-                  <Select
-                    placeholder="CGPA"
-                    style={{ width: 100 }}
-                    value={cgpaFilter}
-                    onChange={setCgpaFilter}
-                  >
-                    <Option value="all">All CGPA</Option>
-                    <Option value="8.0">≥8.0</Option>
-                    <Option value="7.5">≥7.5</Option>
-                    <Option value="7.0">≥7.0</Option>
-                  </Select>
-                  <Search
-                    placeholder="Search students..."
-                    allowClear
-                    style={{ width: 200 }}
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                  />
-                </Space>
-              }
-            >
-              <Table
-                dataSource={filteredStudents}
-                columns={columns}
-                pagination={{
-                  pageSize: 10,
-                  showSizeChanger: true,
-                  showQuickJumper: true,
-                  showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} students`,
-                }}
-                size="small"
-              />
-            </Card>
-          </Col>
-        </Row>
-      </Content>
-    </Layout>
+    <Dropdown overlay={menuItems}>
+      <Button icon={icon}>
+        {buttonName} <DownOutlined />
+      </Button>
+    </Dropdown>
   );
-};
+}
 
-export default DashboardPage;
+function DateRangeFilter({ onChange }: { onChange: (dates: any) => void }) {
+  return <RangePicker onChange={onChange} />;
+}
+
+function SearchFilter({
+  placeholder,
+  style,
+  onSearch,
+}: {
+  placeholder: string;
+  style?: React.CSSProperties;
+  onSearch: (value: string) => void;
+}) {
+  return (
+    <Input.Search
+      placeholder={placeholder}
+      style={style}
+      allowClear
+      onSearch={onSearch}
+    />
+  );
+}
+
+function DataTable<T extends object>({
+  data,
+  columns,
+  rowKey,
+  size = 'middle'
+}: {
+  data: T[];
+  columns: ColumnsType<T>;
+  rowKey: string;
+  size?: 'small' | 'middle' | 'large';
+}) {
+  return (
+    <Table
+      dataSource={data}
+      columns={columns}
+      rowKey={rowKey}
+      size={size}
+      pagination={{ 
+        pageSize: 8,
+        size: "small"
+      }}
+      scroll={{ x: 'max-content' }}
+    />
+  );
+}
+
+// ---- Main Page ----
+export default function StudentsDashboardPage() {
+  const [isGraphical, setIsGraphical] = useState(true);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [filteredData, setFilteredData] = useState<Student[]>([]);
+  const [departmentFilter, setDepartmentFilter] = useState<string>('all');
+  
+  // Define grid layout configuration
+  const gridConfig = {
+    gutter: [16, 16],
+    xs: 24,
+    sm: 12,
+    md: 8,
+    lg: 6
+  };
+
+  useEffect(() => {
+    setStudents(DUMMY_STUDENTS);
+    setFilteredData(DUMMY_STUDENTS);
+  }, []);
+
+  const handleSearch = (value: string) => {
+    const lower = value.toLowerCase();
+    let result = students.filter((item) =>
+      item.name.toLowerCase().includes(lower)
+    );
+    if (departmentFilter !== 'all') {
+      result = result.filter((item) => item.department === departmentFilter);
+    }
+    setFilteredData(result);
+  };
+
+  const handleDepartmentChange = (value: string) => {
+    setDepartmentFilter(value);
+    let result = students;
+    if (value !== 'all') {
+      result = result.filter((item) => item.department === value);
+    }
+    setFilteredData(result);
+  };
+
+  const departmentMenu = (
+    <Menu
+      onClick={({ key }) => handleDepartmentChange(key)}
+      items={[
+        { key: 'all', label: 'All Departments' },
+        ...Array.from(new Set(students.map((s) => s.department))).map(
+          (dept) => ({
+            key: dept,
+            label: dept,
+          })
+        ),
+      ]}
+    />
+  );
+
+  // Stats
+  const totalStudents = students.length;
+  const totalRegistered = students.filter((s) => s.profileCompleted).length;
+  const totalPlaced = students.filter((s) => s.placed).length;
+  const totalCompanies = 12;
+  const departmentStats = getDepartmentStats(students);
+
+  return (
+    <main className="p-4">
+      {/* Header */}
+      <Row align="middle" justify="space-between" style={{ width: '100%', marginBottom: 16 }}>
+        <Col>
+          <HeaderSwitch
+            title="Students"
+            leftLabel="Graphical"
+            rightLabel="Classical"
+            checked={isGraphical}
+            onChange={setIsGraphical}
+          />
+        </Col>
+        <Col>
+          <IconButtonDropdown
+            buttonName="Download"
+            icon={<DownloadOutlined />}
+            dropdownOptions={[
+              { key: '1', label: 'Download as CSV' },
+              { key: '2', label: 'Export to Excel' },
+            ]}
+          />
+        </Col>
+      </Row>
+
+      {/* Stats */}
+      <Row gutter={24} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <Statistic title="Total Students" value={totalStudents} prefix={<UserOutlined />} valueStyle={{ color: '#3f8600' }} />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <Statistic title="Profiles Completed" value={totalRegistered} prefix={<TeamOutlined />} valueStyle={{ color: '#108ee9' }} />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <Statistic title="Companies Visiting" value={totalCompanies} valueStyle={{ color: '#2f54eb' }} />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <Statistic title="Students Placed" value={totalPlaced} prefix={<UserOutlined />} valueStyle={{ color: '#f5222d' }} />
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Charts */}
+      {isGraphical && (
+        <Row gutter={24} style={{ marginBottom: 24 }}>
+          <Col xs={24} md={12}>
+            <Card title="Profile Completion Status">
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Completed', value: totalRegistered },
+                      { name: 'Not Completed', value: totalStudents - totalRegistered },
+                    ]}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label
+                  >
+                    <Cell key="completed" fill="#52c41a" />
+                    <Cell key="notCompleted" fill="#ff4d4f" />
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card title="Department-wise Registration & Placement">
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={departmentStats}>
+                  <XAxis dataKey="department" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="registered" name="Registered" fill="#108ee9" />
+                  <Bar dataKey="placed" name="Placed" fill="#52c41a" />
+                </BarChart>
+              </ResponsiveContainer>
+            </Card>
+          </Col>
+        </Row>
+      )}
+
+      {/* Filters */}
+      <Row gutter={[16, 16]} className="mb-4">
+        <Col xs={24} sm={24} md={8}>
+          <DateRangeFilter onChange={() => {}} />
+        </Col>
+        <Col xs={24} sm={12} md={8}>
+          <Dropdown overlay={departmentMenu} trigger={['click']}>
+            <Button style={{ width: '100%' }}>
+              {departmentFilter === 'all' ? 'All Departments' : departmentFilter} <DownOutlined />
+            </Button>
+          </Dropdown>
+        </Col>
+        <Col xs={24} sm={12} md={8}>
+          <SearchFilter
+            placeholder="Search by Name / Department"
+            style={{ width: '100%' }}
+            onSearch={handleSearch}
+          />
+        </Col>
+      </Row>
+
+      {/* Table */}
+      <div className="bg-white rounded-lg shadow-sm">
+        <DataTable 
+          data={filteredData} 
+          columns={columns} 
+          rowKey="key"
+          size="middle"
+        />
+      </div>
+    </main>
+  );
+}

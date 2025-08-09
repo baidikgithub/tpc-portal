@@ -2,7 +2,8 @@ import React from 'react';
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { AntdRegistry } from '@ant-design/nextjs-registry';
-import './global.css';
+import './globals.css';
+import LayoutWrapper from '@/components/Layout/LayoutWrapper';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,7 +21,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AntdRegistry>
-          {children}
+          <LayoutWrapper>{children}</LayoutWrapper>
         </AntdRegistry>
       </body>
     </html>
