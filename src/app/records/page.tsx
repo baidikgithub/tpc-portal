@@ -1,4 +1,5 @@
-'use client'
+'use client';
+
 import AppHeader from '@/components/Header';
 import React, { useState } from 'react';
 import { Layout } from 'antd';
@@ -72,26 +73,25 @@ const studentsData: Student[] = [
 ];
 
 const RecordsPage: React.FC = () => {
-  // SubToolBar state
   const [hideColumnsModalVisible, setHideColumnsModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
 
   const columns = [
-    'Company',
-    'Guide Allotted', 
-    'Job Domain',
-    'Starting Date',
-    'Ending Date',
-    'Week'
+    { title: 'Company', dataIndex: 'company', key: 'company' },
+    { title: 'Guide Allotted', dataIndex: 'guide', key: 'guide' },
+    { title: 'Job Domain', dataIndex: 'jobDomain', key: 'jobDomain' },
+    { title: 'Starting Date', dataIndex: 'startingDate', key: 'startingDate' },
+    { title: 'Ending Date', dataIndex: 'endingDate', key: 'endingDate' },
+    { title: 'Week', dataIndex: 'week', key: 'week' }
   ];
 
   const filteredColumns = columns.filter(column =>
-    column.toLowerCase().includes(searchText.toLowerCase())
+    column.title.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const handleHideAll = () => {
-    setSelectedColumns([...columns]);
+    setSelectedColumns(columns.map(col => col.key));
   };
 
   const handleShowAll = () => {
@@ -115,21 +115,29 @@ const RecordsPage: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <Layout className="min-h-screen">
       <TopMenuBar />
-      <SubToolBar 
-        hideColumnsModalVisible={hideColumnsModalVisible}
-        searchText={searchText}
-        selectedColumns={selectedColumns}
-        filteredColumns={filteredColumns}
-        onHideColumnsToggle={handleHideColumnsToggle}
-        onSearchTextChange={handleSearchTextChange}
-        onHideAll={handleHideAll}
-        onShowAll={handleShowAll}
-        onColumnToggle={handleColumnToggle}
-      />
-      <Content style={{ background: '#f5f5f5' }}>
-        <StudentTable studentsData={studentsData} />
+      <Content className="p-4">
+        <div className="mb-4">
+          <SubToolBar
+            hideColumnsModalVisible={hideColumnsModalVisible}
+            searchText={searchText}
+            selectedColumns={selectedColumns}
+            filteredColumns={columns.map(col => col.title)}
+            onHideColumnsToggle={handleHideColumnsToggle}
+            onSearchTextChange={handleSearchTextChange}
+            onHideAll={handleHideAll}
+            onShowAll={handleShowAll}
+            onColumnToggle={handleColumnToggle}
+          />
+        </div>
+        <div className="bg-white rounded-lg shadow">
+          <StudentTable 
+            studentsData={studentsData}
+            size="middle"
+            className="overflow-x-auto"
+          />
+        </div>
       </Content>
     </Layout>
   );

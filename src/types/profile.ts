@@ -1,3 +1,5 @@
+import { FormInstance } from 'antd';
+
 export interface PersonalInfo {
   firstName: string;
   lastName: string;
@@ -58,10 +60,20 @@ export interface FormComponentProps {
   form: any;
 }
 
+export interface CommonFormSectionProps {
+  form: FormInstance;
+  loading?: boolean;
+}
+
+export interface FormListSectionProps extends CommonFormSectionProps {
+  onRemoveItem?: () => void;
+}
+
 export interface ProfileHeaderProps {
-  form: any;
-  avatar?: string;
-  firstName?: string;
-  lastName?: string;
-  role?: string;
-} 
+  form: FormInstance;
+  avatarUrl?: string;
+  onAvatarChange?: (info: any) => void;
+  cvFileName?: string;
+  onCvChange?: (info: any) => void;
+  personalInfo?: PersonalInfo;
+}
