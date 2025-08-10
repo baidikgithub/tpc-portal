@@ -1,13 +1,12 @@
 'use client';
-
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, Tag, Space, Button } from 'antd';
 import { EyeOutlined, EditOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import RecordsLayout from '@/components/RecordsLayout';
 import { Guide, ViewType } from '@/types/common';
 
-// Mock data - replace with actual API call
+// Mock data
 const MOCK_GUIDES: Guide[] = [
   {
     id: '1',
@@ -20,8 +19,7 @@ const MOCK_GUIDES: Guide[] = [
     assignedStudents: 8,
     createdAt: '2023-01-01',
     updatedAt: '2023-08-09'
-  },
-  // Add more mock data as needed
+  }
 ];
 
 const GuideRecordsPage = () => {
@@ -32,15 +30,19 @@ const GuideRecordsPage = () => {
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [selectedView, setSelectedView] = useState<ViewType>('all');
 
+  // ✅ New state for row selection
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
   const columns: ColumnsType<Guide> = [
     {
-      title: 'Name',
+      title: <span style={{ fontSize: 12 }}>Name</span>,
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Department',
+      title: <span style={{ fontSize: 12 }}>Department</span>,
       dataIndex: 'department',
       key: 'department',
       filters: Array.from(new Set(guides.map(g => g.department))).map(dept => ({
@@ -48,9 +50,10 @@ const GuideRecordsPage = () => {
         value: dept,
       })),
       onFilter: (value, record) => record.department === value,
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Designation',
+      title: <span style={{ fontSize: 12 }}>Designation</span>,
       dataIndex: 'designation',
       key: 'designation',
       filters: Array.from(new Set(guides.map(g => g.designation))).map(designation => ({
@@ -58,48 +61,34 @@ const GuideRecordsPage = () => {
         value: designation,
       })),
       onFilter: (value, record) => record.designation === value,
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Specialization',
+      title: <span style={{ fontSize: 12 }}>Specialization</span>,
       dataIndex: 'specialization',
       key: 'specialization',
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Email',
+      title: <span style={{ fontSize: 12 }}>Email</span>,
       dataIndex: 'email',
       key: 'email',
+      render: (email) => <span style={{ fontSize: 12 }}>{email || '-'}</span>,
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status) => (
-        <Tag color={status === 'active' ? 'success' : 'error'}>
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </Tag>
-      ),
-    },
-    {
-      title: 'Assigned Students',
+      title: <span style={{ fontSize: 12 }}>Assigned Students</span>,
       dataIndex: 'assignedStudents',
       key: 'assignedStudents',
       sorter: (a, b) => a.assignedStudents - b.assignedStudents,
+      render: (count) => <span style={{ fontSize: 12 }}>{count}</span>,
     },
     {
-      title: 'Actions',
+      title: <span style={{ fontSize: 12 }}>Actions</span>,
       key: 'actions',
       render: (_, record) => (
         <Space size="middle">
-          <Button 
-            type="text" 
-            icon={<EyeOutlined />}
-            onClick={() => handleViewGuide(record)}
-          />
-          <Button 
-            type="text" 
-            icon={<EditOutlined />}
-            onClick={() => handleEditGuide(record)}
-          />
+          <Button type="text" icon={<EyeOutlined />} onClick={() => handleViewGuide(record)} />
+          <Button type="text" icon={<EditOutlined />} onClick={() => handleEditGuide(record)} />
         </Space>
       ),
     },
@@ -108,7 +97,6 @@ const GuideRecordsPage = () => {
   const availableViews: ViewType[] = ['all', 'byDepartment'];
 
   useEffect(() => {
-    // Replace with actual API call
     setGuides(MOCK_GUIDES);
     setFilteredGuides(MOCK_GUIDES);
   }, []);
@@ -127,12 +115,10 @@ const GuideRecordsPage = () => {
   };
 
   const handleViewGuide = (guide: Guide) => {
-    // Implement view logic
     console.log('View guide:', guide);
   };
 
   const handleEditGuide = (guide: Guide) => {
-    // Implement edit logic
     console.log('Edit guide:', guide);
   };
 
@@ -148,9 +134,21 @@ const GuideRecordsPage = () => {
     );
   };
 
-  const filteredColumns = columns
-    .filter(col => !selectedColumns.includes(col.key as string))
-    .map(col => col.title as string);
+  const filteredColumns = columns.filter(col => !selectedColumns.includes(col.key as string));
+
+  // ✅ Row selection logic
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (newSelectedRowKeys: React.Key[]) => {
+      console.log('Selected row keys: ', newSelectedRowKeys);
+      setSelectedRowKeys(newSelectedRowKeys);
+    },
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_INVERT,
+      Table.SELECTION_NONE,
+    ],
+  };
 
   return (
     <RecordsLayout
@@ -158,7 +156,7 @@ const GuideRecordsPage = () => {
       hideColumnsModalVisible={hideColumnsModalVisible}
       searchText={searchText}
       selectedColumns={selectedColumns}
-      filteredColumns={filteredColumns}
+      filteredColumns={filteredColumns.map(col => col.title as string)}
       selectedView={selectedView}
       availableViews={availableViews}
       onViewChange={setSelectedView}
@@ -171,8 +169,9 @@ const GuideRecordsPage = () => {
       onShowAll={() => setSelectedColumns([])}
       onColumnToggle={handleColumnToggle}
     >
-      <Table 
-        columns={columns.filter(col => !selectedColumns.includes(col.key as string))}
+      <Table
+        rowSelection={rowSelection} // ✅ Enable checkbox selection
+        columns={filteredColumns}
         dataSource={filteredGuides}
         rowKey="id"
         size="middle"

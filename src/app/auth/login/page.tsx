@@ -72,27 +72,17 @@ const LoginPage: React.FC = () => {
         >
           {/* Logo */}
           <div style={{ marginBottom: 32 }}>
-            <Image src="/logo.png" alt="SMIT Logo" width={46} height={46} />
+            <Image src="/logo.jpg" alt="SMIT Logo" width={46} height={46} />
             <Typography.Title level={4} style={{ margin: "8px 0 0 0" }}>
               Sikkim Manipal Institute of Technology
             </Typography.Title>
           </div>
 
           {/* Login Title */}
-          <Typography.Title level={2} style={{ marginTop: 0, marginBottom: 12 }}>
+          <Typography.Title level={2} style={{ marginTop: 0, marginBottom: 12, textWrap: "nowrap" }}>
             Training and Placement Cell Portal
           </Typography.Title>
 
-          {/* Social Buttons */}
-          <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-            <Button icon={<FacebookOutlined />} size="large" style={{ flex: 1, background: "#3b5998", color: "#fff", border: "none" }}>
-              Connect With Facebook
-            </Button>
-            <Button icon={<GoogleOutlined />} size="large" style={{ flex: 1, background: "#db4437", color: "#fff", border: "none" }}>
-              Connect With Google
-            </Button>
-          </div>
-          <Divider style={{ margin: "16px 0" }}>or</Divider>
           {/* Login Form */}
           <Form layout="vertical" style={{ width: "100%" }} onFinish={handleLogin}>
             <Form.Item name="email" label="Email Address" rules={[{ required: true, type: "email", message: "Enter a valid email" }]}>
@@ -168,18 +158,6 @@ const LoginPage: React.FC = () => {
           <Typography.Paragraph style={{ color: "#e6e8f3", fontSize: 17, lineHeight: 1.6 }}>
             Placement guidance, interview preparation, and opportunities— all in one platform dedicated to SMIT students.
           </Typography.Paragraph>
-          <a
-            href="#"
-            style={{
-              color: "#fff",
-              textDecoration: "underline",
-              fontWeight: 500,
-              fontSize: 16,
-              letterSpacing: 0.2,
-            }}
-          >
-            Explore Placement Resources
-          </a>
         </div>
       </div>
     </div>

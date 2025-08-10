@@ -42,8 +42,9 @@ export default function RecordsLayout({
   onColumnToggle,
 }: RecordsLayoutProps) {
   return (
-    <Layout className="min-h-screen">
-      <Content className="p-4">
+    // <Layout className="min-h-screen">
+      // <Content className="p-4">
+      <>
         <div className="mb-4">
           <SubToolBar
             hideColumnsModalVisible={hideColumnsModalVisible}
@@ -60,7 +61,8 @@ export default function RecordsLayout({
         <div className="bg-white rounded-lg shadow-sm">
           {children}
         </div>
-      </Content>
-    </Layout>
+        </>
+      // </Content>
+    // </Layout>
   );
 }
