@@ -6,26 +6,7 @@ import { EyeOutlined, EditOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import RecordsLayout from '@/components/RecordsLayout';
 import { Student, ViewType } from '@/types/common';
-
-// Mock data - replace with actual API call
-const MOCK_STUDENTS: Student[] = [
-  {
-    id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
-    department: 'Computer Science',
-    batch: '2023-24',
-    rollNumber: 'CS001',
-    company: 'Tech Corp',
-    guide: 'Dr. Smith',
-    status: 'placed',
-    profileCompleted: true,
-    createdAt: '2023-08-01',
-    updatedAt: '2023-08-09'
-  },
-  // Add more mock data as needed
-];
-
+import { MOCK_STUDENTS } from '@/data/students';
 const StudentRecordsPage = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
@@ -34,20 +15,26 @@ const StudentRecordsPage = () => {
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [selectedView, setSelectedView] = useState<ViewType>('all');
 
+  // ✅ Row selection state
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
   const columns: ColumnsType<Student> = [
     {
-      title: 'Name',
+      title: <span style={{ fontSize: 12 }}>Name</span>,
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Roll Number',
+      title: <span style={{ fontSize: 12 }}>Registration Number</span>,
       dataIndex: 'rollNumber',
       key: 'rollNumber',
+      sorter: (a, b) => a.rollNumber.localeCompare(b.rollNumber),
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Department',
+      title: <span style={{ fontSize: 12 }}>Department</span>,
       dataIndex: 'department',
       key: 'department',
       filters: Array.from(new Set(students.map(s => s.department))).map(dept => ({
@@ -55,9 +42,16 @@ const StudentRecordsPage = () => {
         value: dept,
       })),
       onFilter: (value, record) => record.department === value,
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Batch',
+      title: <span style={{ fontSize: 12 }}>Email</span>,
+      dataIndex: 'email',
+      key: 'email',
+      render: (email) => <span style={{ fontSize: 12 }}>{email || '-'}</span>,
+    },
+    {
+      title: <span style={{ fontSize: 12 }}>Batch</span>,
       dataIndex: 'batch',
       key: 'batch',
       filters: Array.from(new Set(students.map(s => s.batch))).map(batch => ({
@@ -65,58 +59,55 @@ const StudentRecordsPage = () => {
         value: batch,
       })),
       onFilter: (value, record) => record.batch === value,
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Company',
-      dataIndex: 'company',
-      key: 'company',
-      render: (company) => company || '-',
-    },
-    {
-      title: 'Guide',
+      title: <span style={{ fontSize: 12 }}>Guide</span>,
       dataIndex: 'guide',
       key: 'guide',
-      render: (guide) => guide || '-',
+      render: (guide) => <span style={{ fontSize: 12 }}>{guide || '-'}</span>,
     },
     {
-      title: 'Status',
+      title: <span style={{ fontSize: 12 }}>Status</span>,
       dataIndex: 'status',
       key: 'status',
       render: (status) => (
-        <Tag color={
-          status === 'placed' ? 'success' :
-          status === 'inProgress' ? 'processing' :
-          'default'
-        }>
+        <Tag style={{ fontSize: 12 }}
+             color={status === 'placed' ? 'success' :
+                    status === 'inProgress' ? 'processing' : 'default'}>
           {status.charAt(0).toUpperCase() + status.slice(1)}
         </Tag>
       ),
     },
     {
-      title: 'Profile',
+      title: <span style={{ fontSize: 12 }}>Profile Completed</span>,
       dataIndex: 'profileCompleted',
       key: 'profileCompleted',
       render: (completed) => (
-        <Tag color={completed ? 'success' : 'warning'}>
+        <Tag style={{ fontSize: 12 }} color={completed ? 'success' : 'warning'}>
           {completed ? 'Completed' : 'Incomplete'}
         </Tag>
       ),
     },
     {
-      title: 'Actions',
+      title: <span style={{ fontSize: 12 }}>Created At</span>,
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (date) => <span style={{ fontSize: 12 }}>{new Date(date).toLocaleDateString()}</span>,
+    },
+    {
+      title: <span style={{ fontSize: 12 }}>Updated At</span>,
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
+      render: (date) => <span style={{ fontSize: 12 }}>{new Date(date).toLocaleDateString()}</span>,
+    },
+    {
+      title: <span style={{ fontSize: 12 }}>Actions</span>,
       key: 'actions',
       render: (_, record) => (
         <Space size="middle">
-          <Button 
-            type="text" 
-            icon={<EyeOutlined />}
-            onClick={() => handleViewStudent(record)}
-          />
-          <Button 
-            type="text" 
-            icon={<EditOutlined />}
-            onClick={() => handleEditStudent(record)}
-          />
+          <Button type="text" size="small" icon={<EyeOutlined />} onClick={() => handleViewStudent(record)} />
+          <Button type="text" size="small" icon={<EditOutlined />} onClick={() => handleEditStudent(record)} />
         </Space>
       ),
     },
@@ -125,7 +116,6 @@ const StudentRecordsPage = () => {
   const availableViews: ViewType[] = ['all', 'byCompany', 'byGuide', 'byBatch', 'byDepartment'];
 
   useEffect(() => {
-    // Replace with actual API call
     setStudents(MOCK_STUDENTS);
     setFilteredStudents(MOCK_STUDENTS);
   }, []);
@@ -144,12 +134,10 @@ const StudentRecordsPage = () => {
   };
 
   const handleViewStudent = (student: Student) => {
-    // Implement view logic
     console.log('View student:', student);
   };
 
   const handleEditStudent = (student: Student) => {
-    // Implement edit logic
     console.log('Edit student:', student);
   };
 
@@ -158,16 +146,26 @@ const StudentRecordsPage = () => {
   };
 
   const handleColumnToggle = (columnKey: string) => {
-    setSelectedColumns(prev => 
-      prev.includes(columnKey) 
-        ? prev.filter(key => key !== columnKey)
-        : [...prev, columnKey]
+    setSelectedColumns(prev =>
+      prev.includes(columnKey) ? prev.filter(key => key !== columnKey) : [...prev, columnKey]
     );
   };
 
-  const filteredColumns = columns
-    .filter(col => !selectedColumns.includes(col.key as string))
-    .map(col => col.title as string);
+  // ✅ Row selection logic
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (newSelectedRowKeys: React.Key[]) => {
+      console.log('Selected student IDs: ', newSelectedRowKeys);
+      setSelectedRowKeys(newSelectedRowKeys);
+    },
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_INVERT,
+      Table.SELECTION_NONE,
+    ],
+  };
+
+  const filteredColumns = columns.filter(col => !selectedColumns.includes(col.key as string));
 
   return (
     <RecordsLayout
@@ -175,7 +173,7 @@ const StudentRecordsPage = () => {
       hideColumnsModalVisible={hideColumnsModalVisible}
       searchText={searchText}
       selectedColumns={selectedColumns}
-      filteredColumns={filteredColumns}
+      filteredColumns={filteredColumns.map(col => col.title as string)}
       selectedView={selectedView}
       availableViews={availableViews}
       onViewChange={setSelectedView}
@@ -188,17 +186,16 @@ const StudentRecordsPage = () => {
       onShowAll={() => setSelectedColumns([])}
       onColumnToggle={handleColumnToggle}
     >
-      <Table 
-        columns={columns.filter(col => !selectedColumns.includes(col.key as string))}
-        dataSource={filteredStudents}
-        rowKey="id"
-        size="middle"
-        pagination={{ 
-          pageSize: 10,
-          showSizeChanger: true,
-          showTotal: (total) => `Total ${total} students`
-        }}
-      />
+      <div style={{ width: '100%', overflowX: 'auto' }}>
+        <Table
+          className="compact-table"
+          rowSelection={rowSelection} // ✅ Enable checkboxes
+          columns={filteredColumns}
+          dataSource={filteredStudents}
+          rowKey="id"
+          size="middle"
+        />
+      </div>
     </RecordsLayout>
   );
 };

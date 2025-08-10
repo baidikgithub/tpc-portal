@@ -196,7 +196,6 @@ function DataTable<T extends object>({
 
 // ---- Main Page ----
 export default function StudentsDashboardPage() {
-  const [isGraphical, setIsGraphical] = useState(true);
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredData, setFilteredData] = useState<Student[]>([]);
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
@@ -259,28 +258,7 @@ export default function StudentsDashboardPage() {
 
   return (
     <main className="p-4">
-      {/* Header */}
-      <Row align="middle" justify="space-between" style={{ width: '100%', marginBottom: 16 }}>
-        <Col>
-          <HeaderSwitch
-            title="Students"
-            leftLabel="Graphical"
-            rightLabel="Classical"
-            checked={isGraphical}
-            onChange={setIsGraphical}
-          />
-        </Col>
-        <Col>
-          <IconButtonDropdown
-            buttonName="Download"
-            icon={<DownloadOutlined />}
-            dropdownOptions={[
-              { key: '1', label: 'Download as CSV' },
-              { key: '2', label: 'Export to Excel' },
-            ]}
-          />
-        </Col>
-      </Row>
+
 
       {/* Stats */}
       <Row gutter={24} style={{ marginBottom: 24 }}>
@@ -307,7 +285,6 @@ export default function StudentsDashboardPage() {
       </Row>
 
       {/* Charts */}
-      {isGraphical && (
         <Row gutter={24} style={{ marginBottom: 24 }}>
           <Col xs={24} md={12}>
             <Card title="Profile Completion Status">
@@ -348,7 +325,6 @@ export default function StudentsDashboardPage() {
             </Card>
           </Col>
         </Row>
-      )}
 
       {/* Filters */}
       <Row gutter={[16, 16]} className="mb-4">

@@ -4,13 +4,13 @@ import React from 'react';
 import {
   Typography,
   Space,
-  Divider,
   Avatar,
   Upload,
   Button,
   Tooltip,
   Dropdown,
   Menu,
+  Input,
 } from 'antd';
 import {
   MailOutlined,
@@ -29,39 +29,64 @@ const { Title, Text } = Typography;
 
 interface LeftSidebarProps {
   name: string;
+  onNameChange: (v: string) => void;
   employeeID: string;
+  onEmployeeIDChange: (v: string) => void;
+
   phone: string;
+  onPhoneChange: (v: string) => void;
   email: string;
+  onEmailChange: (v: string) => void;
+
   address: string;
+  onAddressChange: (v: string) => void;
   city: string;
+  onCityChange: (v: string) => void;
   postcode: string;
+  onPostcodeChange: (v: string) => void;
+
   dob: string;
+  onDobChange: (v: string) => void;
   nationalID: string;
+  onNationalIDChange: (v: string) => void;
   title: string;
+  onTitleChange: (v: string) => void;
   hireDate: string;
+  onHireDateChange: (v: string) => void;
+
   avatarUrl?: string;
-  onAvatarUpload?: (file: File) => void;
+  onAvatarUpload: (file: File) => void;
+
+  isEditing: boolean;
+  onEditProfile: () => void;
 }
 
-const LeftSidebar: React.FC<LeftSidebarProps> = ({
-  name,
-  employeeID,
-  phone,
-  email,
-  address,
-  city,
-  postcode,
-  dob,
-  nationalID,
-  title,
-  hireDate,
-  avatarUrl,
-}) => {
-  // Dropdown menu items for three-dot menu
+const FieldDisplay: React.FC<{
+  label?: string;
+  icon?: React.ReactNode;
+  value: string;
+  editable: boolean;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}> = ({ icon, value, editable, onChange, placeholder }) => {
+  return editable ? (
+    <Input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      size="small"
+      placeholder={placeholder || ''}
+      style={{ borderBottom: '1px solid #ddd', paddingLeft: 0 }}
+    />
+  ) : (
+    <Text>{value || 'N/A'}</Text>
+  );
+};
+
+const LeftSidebar: React.FC<LeftSidebarProps> = (props) => {
   const menu = (
     <Menu
       items={[
-        { key: 'edit', label: 'Edit Profile' },
+        { key: 'edit', label: 'Edit Profile', onClick: props.onEditProfile },
         { key: 'changePhoto', label: 'Change Photo' },
         { key: 'settings', label: 'Settings' },
       ]}
@@ -73,29 +98,19 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
       style={{
         position: 'relative',
         flex: '0 0 300px',
-        // background: '#fff',
-        // borderRadius: 12,
-        boxShadow: '0 2px 12px rgba(0,0,0,0.10)',
         padding: '32px 24px',
         top: 2,
-        alignSelf: 'flex-start',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         gap: 16,
       }}
     >
-      {/* Top-right three-dot edit button */}
+      {/* Top-right menu */}
       <div style={{ position: 'absolute', top: 16, right: 16 }}>
         <Dropdown overlay={menu} trigger={['click']} placement="bottomRight" arrow>
           <Tooltip title="More options">
-            <Button
-              shape="circle"
-              icon={<EllipsisOutlined />}
-              size="small"
-              type="text"
-              aria-label="More options"
-            />
+            <Button shape="circle" icon={<EllipsisOutlined />} size="small" type="text" />
           </Tooltip>
         </Dropdown>
       </div>
@@ -104,91 +119,153 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({
       <Upload
         showUploadList={false}
         beforeUpload={(file) => {
-          const isImage = file.type.startsWith('image/');
-          if (!isImage) {
-            alert('You can only upload image files!');
-          }
-          return isImage || Upload.LIST_IGNORE;
+          props.onAvatarUpload(file);
+          return false; // no auto-upload
         }}
         accept="image/*"
+        disabled={!props.isEditing}
       >
-        <Tooltip title="Click to upload profile photo">
+        <Tooltip title={props.isEditing ? 'Upload profile photo' : ''}>
           <Avatar
             size={110}
-            src={avatarUrl || undefined}
-            icon={!avatarUrl && <UserOutlined />}
+            src={props.avatarUrl || undefined}
+            icon={!props.avatarUrl && <UserOutlined />}
             style={{
-              cursor: 'pointer',
+              cursor: props.isEditing ? 'pointer' : 'default',
               marginBottom: 8,
               boxShadow: '0 0 6px rgba(0,0,0,0.15)',
             }}
           />
         </Tooltip>
-        <Button
-          icon={<UploadOutlined />}
-          size="small"
-          style={{ marginTop: 8, borderRadius: 6 }}
-          block
-        >
-          Upload Photo
-        </Button>
+        {props.isEditing && (
+          <Button
+            icon={<UploadOutlined />}
+            size="small"
+            style={{ marginTop: 8, borderRadius: 6 }}
+            block
+          >
+            Upload Photo
+          </Button>
+        )}
       </Upload>
 
-      {/* Name + Employee ID */}
-      <Title level={4} style={{ margin: 0, textAlign: 'center' }}>
-        {name}
-      </Title>
-      <Text type="secondary">{employeeID}</Text>
+      {/* Name & ID */}
+      {props.isEditing ? (
+        <Input
+          value={props.name}
+          onChange={(e) => props.onNameChange(e.target.value)}
+          size="middle"
+          style={{ fontWeight: 600, textAlign: 'center' }}
+        />
+      ) : (
+        <Title level={4} style={{ margin: 0, textAlign: 'center' }}>
+          {props.name}
+        </Title>
+      )}
+      {props.isEditing ? (
+        <Input
+          value={props.employeeID}
+          onChange={(e) => props.onEmployeeIDChange(e.target.value)}
+          size="small"
+          style={{ textAlign: 'center' }}
+        />
+      ) : (
+        <Text type="secondary">{props.employeeID}</Text>
+      )}
 
-      {/* ABOUT SECTION */}
+      {/* About */}
       <Space direction="vertical" style={{ width: '100%' }}>
-        <Text strong style={{ fontSize: 15 }}>About</Text>
+        <Text strong>About</Text>
         <Space>
           <PhoneOutlined style={{ color: '#1890ff' }} />
-          <Text>{phone || 'N/A'}</Text>
+          <FieldDisplay
+            value={props.phone}
+            editable={props.isEditing}
+            onChange={props.onPhoneChange}
+            placeholder="Phone"
+          />
         </Space>
         <Space>
           <MailOutlined style={{ color: '#1890ff' }} />
-          <Text>{email || 'N/A'}</Text>
+          <FieldDisplay
+            value={props.email}
+            editable={props.isEditing}
+            onChange={props.onEmailChange}
+            placeholder="Email"
+          />
         </Space>
       </Space>
 
-      {/* ADDRESS SECTION */}
+      {/* Address */}
       <Space direction="vertical" style={{ width: '100%' }}>
-        <Text strong style={{ fontSize: 15 }}>Address</Text>
+        <Text strong>Address</Text>
         <Space>
           <HomeOutlined style={{ color: '#722ed1' }} />
-          <Text>{address || 'N/A'}</Text>
+          <FieldDisplay
+            value={props.address}
+            editable={props.isEditing}
+            onChange={props.onAddressChange}
+            placeholder="Address"
+          />
         </Space>
         <Space>
           <EnvironmentOutlined style={{ color: '#52c41a' }} />
-          <Text>{city || 'N/A'}</Text>
+          <FieldDisplay
+            value={props.city}
+            editable={props.isEditing}
+            onChange={props.onCityChange}
+            placeholder="City"
+          />
         </Space>
         <Space>
           <SolutionOutlined style={{ color: '#eb2f96' }} />
-          <Text>{postcode || 'N/A'}</Text>
+          <FieldDisplay
+            value={props.postcode}
+            editable={props.isEditing}
+            onChange={props.onPostcodeChange}
+            placeholder="Postcode"
+          />
         </Space>
       </Space>
 
-      {/* EMPLOYEE DETAILS SECTION */}
-
+      {/* Details */}
       <Space direction="vertical" style={{ width: '100%' }}>
-        <Text strong style={{ fontSize: 15 }}>Student Details</Text>
+        <Text strong>Student Details</Text>
         <Space>
           <CalendarOutlined style={{ color: '#fa8c16' }} />
-          <Text>Date of birth: {dob || 'N/A'}</Text>
+          <FieldDisplay
+            value={props.dob}
+            editable={props.isEditing}
+            onChange={props.onDobChange}
+            placeholder="DOB"
+          />
         </Space>
         <Space>
           <IdcardOutlined style={{ color: '#13c2c2' }} />
-          <Text>National ID: {nationalID || 'N/A'}</Text>
+          <FieldDisplay
+            value={props.nationalID}
+            editable={props.isEditing}
+            onChange={props.onNationalIDChange}
+            placeholder="National ID"
+          />
         </Space>
         <Space>
           <UserOutlined style={{ color: '#2f54eb' }} />
-          <Text>Title: {title || 'N/A'}</Text>
+          <FieldDisplay
+            value={props.title}
+            editable={props.isEditing}
+            onChange={props.onTitleChange}
+            placeholder="Title"
+          />
         </Space>
         <Space>
           <CalendarOutlined style={{ color: '#faad14' }} />
-          <Text>Hire date: {hireDate || 'N/A'}</Text>
+          <FieldDisplay
+            value={props.hireDate}
+            editable={props.isEditing}
+            onChange={props.onHireDateChange}
+            placeholder="Hire Date"
+          />
         </Space>
       </Space>
     </div>

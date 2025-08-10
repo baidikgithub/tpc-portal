@@ -1,16 +1,14 @@
-import React from 'react';
-import { Row, Space, Typography, Button, Input, Checkbox, Divider } from 'antd';
+import React, { useState } from 'react';
+import { Row, Space, Typography, Button, Input, Checkbox } from 'antd';
 import {
   EyeOutlined,
   FilterOutlined,
   GroupOutlined,
-  ColumnHeightOutlined,
   SortAscendingOutlined,
   TableOutlined,
-  UserOutlined,
+  EyeInvisibleOutlined,
   SearchOutlined,
   QuestionCircleOutlined,
-  EyeInvisibleOutlined,
 } from '@ant-design/icons';
 
 interface SubToolBarProps {
@@ -36,6 +34,9 @@ const SubToolBar: React.FC<SubToolBarProps> = ({
   onShowAll,
   onColumnToggle
 }) => {
+  // Local state for showing the search bar
+  const [showSearch, setShowSearch] = useState(false);
+
   return (
     <div style={{ position: 'relative' }}>
       <Row
@@ -66,12 +67,7 @@ const SubToolBar: React.FC<SubToolBarProps> = ({
             <EyeInvisibleOutlined style={{ fontSize: '12px' }} />
             <Button 
               type="link" 
-              style={{ 
-                padding: 0, 
-                fontSize: '12px', 
-                color: '#333',
-                height: 'auto'
-              }}
+              style={{ padding: 0, fontSize: '12px', color: '#333', height: 'auto' }}
               onClick={onHideColumnsToggle}
             >
               Hide columns
@@ -99,11 +95,7 @@ const SubToolBar: React.FC<SubToolBarProps> = ({
                     value={searchText}
                     onChange={(e) => onSearchTextChange(e.target.value)}
                     style={{ fontSize: '12px' }}
-                    suffix={
-                      <QuestionCircleOutlined 
-                        style={{ fontSize: '12px', color: '#999' }} 
-                      />
-                    }
+                    suffix={<QuestionCircleOutlined style={{ fontSize: '12px', color: '#999' }} />}
                   />
                 </div>
                 
@@ -122,18 +114,10 @@ const SubToolBar: React.FC<SubToolBarProps> = ({
                 </div>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Button 
-                    type="link" 
-                    onClick={onHideAll}
-                    style={{ fontSize: '12px', padding: 0 }}
-                  >
+                  <Button type="link" onClick={onHideAll} style={{ fontSize: '12px', padding: 0 }}>
                     Hide All
                   </Button>
-                  <Button 
-                    type="link" 
-                    onClick={onShowAll}
-                    style={{ fontSize: '12px', padding: 0 }}
-                  >
+                  <Button type="link" onClick={onShowAll} style={{ fontSize: '12px', padding: 0 }}>
                     Show All
                   </Button>
                 </div>
@@ -159,7 +143,27 @@ const SubToolBar: React.FC<SubToolBarProps> = ({
             </Typography.Text>
           </Space>
         </Space>
-        <SearchOutlined style={{ fontSize: '14px', color: '#666' }} />
+
+        {/* Search Toggle Area */}
+        <div style={{ minWidth: '160px', textAlign: 'right' }}>
+          {showSearch ? (
+            <Input
+              autoFocus
+              placeholder="Search students..."
+              value={searchText}
+              onChange={(e) => onSearchTextChange(e.target.value)}
+              onBlur={() => setShowSearch(false)}
+              style={{ width: 160, fontSize: '12px' }}
+              suffix={<SearchOutlined style={{ fontSize: '12px', color: '#666' }} />}
+            />
+          ) : (
+            <Button
+              type="text"
+              icon={<SearchOutlined style={{ fontSize: '14px', color: '#666' }} />}
+              onClick={() => setShowSearch(true)}
+            />
+          )}
+        </div>
       </Row>
     </div>
   );

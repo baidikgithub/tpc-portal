@@ -6,24 +6,7 @@ import { EyeOutlined, EditOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import RecordsLayout from '@/components/RecordsLayout';
 import { Company, ViewType } from '@/types/common';
-
-// Mock data - replace with actual API call
-const MOCK_COMPANIES: Company[] = [
-  {
-    id: '1',
-    name: 'Tech Corp',
-    industry: 'Information Technology',
-    location: 'Bangalore',
-    contactPerson: 'Jane Smith',
-    email: 'jane@techcorp.com',
-    phone: '+91 9876543210',
-    status: 'active',
-    totalPlacements: 15,
-    createdAt: '2023-01-01',
-    updatedAt: '2023-08-09'
-  },
-  // Add more mock data as needed
-];
+import { MOCK_COMPANIES } from '@/data/companies';
 
 const CompanyRecordsPage = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -35,13 +18,14 @@ const CompanyRecordsPage = () => {
 
   const columns: ColumnsType<Company> = [
     {
-      title: 'Name',
+      title: <span style={{ fontSize: 12, fontWeight: 'normal' }}>Name</span>,
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Industry',
+      title: <span style={{ fontSize: 12, fontWeight: 'normal' }}>Industry</span>,
       dataIndex: 'industry',
       key: 'industry',
       filters: Array.from(new Set(companies.map(c => c.industry))).map(industry => ({
@@ -49,9 +33,10 @@ const CompanyRecordsPage = () => {
         value: industry,
       })),
       onFilter: (value, record) => record.industry === value,
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Location',
+      title: <span style={{ fontSize: 12, fontWeight: 'normal' }}>Location</span>,
       dataIndex: 'location',
       key: 'location',
       filters: Array.from(new Set(companies.map(c => c.location))).map(location => ({
@@ -59,50 +44,58 @@ const CompanyRecordsPage = () => {
         value: location,
       })),
       onFilter: (value, record) => record.location === value,
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Contact Person',
+      title: <span style={{ fontSize: 12, fontWeight: 'normal' }}>Contact Person</span>,
       dataIndex: 'contactPerson',
       key: 'contactPerson',
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Email',
+      title: <span style={{ fontSize: 12, fontWeight: 'normal' }}>Email</span>,
       dataIndex: 'email',
       key: 'email',
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Phone',
+      title: <span style={{ fontSize: 12, fontWeight: 'normal' }}>Phone</span>,
       dataIndex: 'phone',
       key: 'phone',
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Status',
+      title: <span style={{ fontSize: 12, fontWeight: 'normal' }}>Status</span>,
       dataIndex: 'status',
       key: 'status',
       render: (status) => (
-        <Tag color={status === 'active' ? 'success' : 'error'}>
+        <Tag style={{ fontSize: 12 }} color={status === 'active' ? 'success' : 'error'}>
           {status.charAt(0).toUpperCase() + status.slice(1)}
         </Tag>
       ),
+
     },
     {
-      title: 'Total Placements',
+      title: <span style={{ fontSize: 12, fontWeight: 'normal' }}>Total Placements</span>,
       dataIndex: 'totalPlacements',
       key: 'totalPlacements',
       sorter: (a, b) => a.totalPlacements - b.totalPlacements,
+      render: (text) => <span style={{ fontSize: 12 }}>{text}</span>,
     },
     {
-      title: 'Actions',
+      title: <span style={{ fontSize: 12, fontWeight: 'normal' }}>Actions</span>,
       key: 'actions',
       render: (_, record) => (
         <Space size="middle">
-          <Button 
-            type="text" 
+          <Button
+            style={{ fontSize: 12 }}
+            type="text"
             icon={<EyeOutlined />}
             onClick={() => handleViewCompany(record)}
           />
-          <Button 
-            type="text" 
+          <Button
+            style={{ fontSize: 12 }}
+            type="text"
             icon={<EditOutlined />}
             onClick={() => handleEditCompany(record)}
           />
@@ -148,8 +141,8 @@ const CompanyRecordsPage = () => {
   };
 
   const handleColumnToggle = (columnKey: string) => {
-    setSelectedColumns(prev => 
-      prev.includes(columnKey) 
+    setSelectedColumns(prev =>
+      prev.includes(columnKey)
         ? prev.filter(key => key !== columnKey)
         : [...prev, columnKey]
     );
@@ -178,12 +171,12 @@ const CompanyRecordsPage = () => {
       onShowAll={() => setSelectedColumns([])}
       onColumnToggle={handleColumnToggle}
     >
-      <Table 
+      <Table
         columns={columns.filter(col => !selectedColumns.includes(col.key as string))}
         dataSource={filteredCompanies}
         rowKey="id"
         size="middle"
-        pagination={{ 
+        pagination={{
           pageSize: 10,
           showSizeChanger: true,
           showTotal: (total) => `Total ${total} companies`
