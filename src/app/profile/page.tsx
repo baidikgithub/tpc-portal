@@ -97,11 +97,7 @@ export default function UsersDataPage() {
             <RightSidebar
               title="Projects"
               fields={[
-                { name: 'role', label: 'Role / Job Title', type: 'text', rules: [{ required: true }] },
-                { name: 'company', label: 'Company', type: 'text', rules: [{ required: true }] },
-                { name: 'startDate', label: 'Start Date', type: 'date', picker: 'month', rules: [{ required: true }] },
-                { name: 'endDate', label: 'End Date', type: 'date', picker: 'month', rules: [{ required: true }] },
-                { name: 'description', label: 'Description', type: 'textarea' }
+                { name: 'title', label: 'Title', type: 'text', rules: [{ required: true }] },
               ]}
             />
             <RightSidebar
